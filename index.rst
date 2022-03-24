@@ -15,10 +15,10 @@ This technical note discusses the architectural design details of such a service
 Use cases
 =========
 
-There are not strict requirements on Noteburst, however, we can derive a basic notion of required functionality from our use cases.
+There are no formal project requirements on Noteburst, however, we can derive a basic notion of required functionality from our use cases.
 These requirements can frame the subsequent design deliberation.
 
-In the Times Square use case, users are visiting web pages in a browser, and those pages contain HTML renderings of executed Jupyter Notebooks.
+In the Times Square (:sqr:`062`) use case, users are visiting web pages in a browser, and those pages contain HTML renderings of executed Jupyter Notebooks.
 Although Times Square will cache executed Jupyter Notebooks, if the user requests a novel parameterization of a notebook that isn't in Times Square's cache, that webpage visit will ultimately result in a request to Noteburst to execute a new notebook.
 Furthermore multiple users may visit different novel pages, each requiring a different execution through Noteburst.
 
