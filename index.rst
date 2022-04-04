@@ -9,61 +9,50 @@ Abstract
 
 Jupyter Notebooks are a widely used medium in Rubin Observatory for communicating through documentation and executable code.
 Until now, Jupyter Notebooks have only been accessible from the Notebook Aspect of the Rubin Science Platform (JupyterLab).
-There are applications where we can benefit from "headless" execution of Jupyter notebooks through a web API, such as preparing status dashboards (Times Square, :sqr:`062`), and continuous integration of code samples in documentation.
+There are applications where we can benefit from "headless" execution of Jupyter notebooks through a web API, such as preparing status dashboards (Times Square, :sqr:`062` :cite:`SQR-062`), and continuous integration of code samples in documentation.
 This technical note discusses the architectural design details of such a service, called Noteburst.
 
 Use cases
 =========
 
-There are no formal project requirements on Noteburst, however, we can derive a basic notion of required functionality from our use cases.
-These requirements can frame the subsequent design deliberation.
+These are examples of applications that are either enabled by, or can benefit from, a headless Jupyter Notebook service co-located on the Rubin Science Platform.
 
-In the Times Square (:sqr:`062`) use case, users are visiting web pages in a browser, and those pages contain HTML renderings of executed Jupyter Notebooks.
+Times Square
+------------
+
+In the Times Square (:sqr:`062`, :cite:`SQR-062`) use case, users are visiting web pages in a browser, and those pages contain HTML renderings of executed Jupyter Notebooks.
 Although Times Square will cache executed Jupyter Notebooks, if the user requests a novel parameterization of a notebook that isn't in Times Square's cache, that webpage visit will ultimately result in a request to Noteburst to execute a new notebook.
 Furthermore multiple users may visit different novel pages, each requiring a different execution through Noteburst.
 
-.. The front-end application will need to deal with delays in the notebook rendering.
+Notebook-based technical notes
+------------------------------
 
-An asynchronous noteburst API?
-==============================
+Rubin has a robust technical note platform (:sqr:`000` :cite:`SQR-000`), that empowers staff to share technical information quickly and widely with little overhead.
+At the moment, technical notes are written either as Sphinx/reStructuredText or PDF (LaTeX) documents.
+Jupyter Notebooks can be a compelling addition to this line-up for documentation applications that combine computational analysis and visualization with prose.
+For example, a technical note could include an analysis of data available from the Rubin Science Platform, and all figures and tables presented in that technical note are the direct result of that computation.
 
-Is an asynchronous API and job queue required for Noteburst?
+Technotes are typically published through GitHub Actions, where we have upload credentials available and established workflow patterns.
+Rubin data or software like the LSST Science Pipelines aren't typically available through GitHub Actions.
+The naive workaround is to execute the notebook on the RSP and commit the result into the technote's GitHub repository.
+There are at least two downsides to this.
+First, the executed notebook takes more storage space because of its outputs and it generally harder to manage in a Git workflow.
+Second, the technote is less reproducible since there are many manual steps between executing a notebook and publish it as a technote.
 
-In a synchronous API, a client would request a notebook execution from noteburst and expect to receive the executed notebook as a response.
-This synchronous API requires that the notebook can be returned within the period of an HTTP request, which is ideally less than a few seconds, and certainly no longer than 30 seconds.
+The solution could be to use a "headless notebook execution" web service hosted on the Rubin Science Platform.
+The author commits a change to an (unexecuted) Jupyter Notebook-based technote, which triggers a GitHub Actions workflow.
+That workflow makes a call to the service (noteburst) using an RSP token stored in the repository's GitHub Secrets.
+Once the workflow gets the executed notebook back from the web service, it uses the local CI environment to convert the notebook into HTML and publish it through LSST the Docs (:sqr:`006` :cite:`SQR-006`).
 
-Responding with an executed notebook can be delayed for a number of reasons:
+Documentation testing
+---------------------
 
-1. The JupyterLab pod needs to spawn.
-2. The notebook takes a certain duration to execute (the notebook may even make its own network requests, in addition to data processing and plotting).
-3. The JupyterLab pod may already be in use by another noteburst client job (**note:** it is unknown whether it is possible to have
+Similar to the above use-case, the ability to test sample code and examples from documentation could benefit from a service that executes code on the RSP and packages the outputs in Jupyter Notebook format.
+See :sqr:`032` :cite:`SQR-032` for additional ideas on this subject.
 
-.. note::
-
-   It is unclear whether noteburst can run multiple notebook executions on the same pod.
-   This needs to be tested --- both with the websocket style of kernel execution and with the JupyterLab extension for notebook execution.
-
-In an asynchronous API the client would follow these steps:
-
-1. Request a notebook execution by sending the notebook to noteburst in a ``POST`` request.
-   Noteburst would reply with a job ID.
-2. The client would pole a job status endpoint until the status is marked as "done."
-3. The client would request the executed notebook content from another endpoint.
-
-A variation on this API is to use webhooks to bypass polling for clients that have their own web API:
-
-1. Request a notebook execution by sending the notebook to noteburst in a ``POST`` request. Also send a webhook callback URL and a secret key.
-2. Once noteburst executes the notebook, it sends a ``POST`` request to the registered webhook URL and includes the secret key for the client to validate.
-
-The webhook model is ideal for Times Square since any Times Square API pod could receive the notebook and add it to its cache.
-Times Square would need to provide an additional API for its front-end client though to indicate if the notebook is ready and the front-end would likely need to pole that endpoint unless websockets are used between the Times Square UI and Times Square API.
-
-Overall, a synchronous API is much easier to implement.
-However our experience with other systems that perform non-trivial work in a request handler is that these APIs can be fragile, and it's much better to design for the worst-case with an asynchronous API from the start.
-
-.. .. rubric:: References
+.. rubric:: References
 
 .. Make in-text citations with: :cite:`bibkey`.
 
-.. .. bibliography:: local.bib lsstbib/books.bib lsstbib/lsst.bib lsstbib/lsst-dm.bib lsstbib/refs.bib lsstbib/refs_ads.bib
-..    :style: lsst_aa
+.. bibliography:: local.bib lsstbib/books.bib lsstbib/lsst.bib lsstbib/lsst-dm.bib lsstbib/refs.bib lsstbib/refs_ads.bib
+   :style: lsst_aa
