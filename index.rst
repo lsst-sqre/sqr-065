@@ -95,6 +95,42 @@ Noteburst uses Redis for two concerns:
 1. As a global lock of claimed user identities for worker pods
 2. As a storage backend for queued job submitted through the API pods and results submitted through the worker pods.
 
+Mechanism for managing JupyterLab identities of workers
+=======================================================
+
+Each Noteburst worker pod acts as the user for a corresponding Nublado (JupyterLab) pod.
+When a Noteburst worker starts up, it also spawns a JupyterLab pod (and when the Noteburst worker terminates it also ideally terminates the JupyterLab pod).
+This behavior implies that each running Noteburst worker must be configured with a unique RSP (bot) user identity.
+
+To accomplish this, we use a list of user identities reserved for Noteburst.
+At the moment, these user identities are provided as a Kubernetes ConfigMap that is mounted by worker pods:
+
+.. code-block:: yaml
+
+   apiVersion: v1
+   kind: ConfigMap
+   metadata:
+     name: noteburst-worker-identities
+   data:
+     identities.yaml: |
+       - uid: 90000
+         username: "noteburst90000"
+       - uid: 90001
+         username: "noteburst90001"
+       - uid: 90002
+         username: "noteburst90002"
+
+(The contents of ``identities.yaml`` is configurable via Helm values files.)
+
+When a worker starts up, it uses an ``IdentityManager`` to acquire an identity.
+The manager loops through the items in the ``identity.yaml`` configuration and queries Redis whether this identity is claimed.
+If no claim for a specific identity exists, the worker claims that identity.
+Claims are established and maintained through the aioredlock_ library, which is a Python implementation of the `Redis Redlock distributed locking algorithm <https://redis.io/docs/reference/patterns/distributed-locks/>`__.
+aioredlock_ implements a background "keep-alive" refresh on the claim for the life of the worker.
+Once the worker is terminated, the claim naturally expires and the identity becomes available again.
+
+Through this mechanism, a pool of Noteburst workers can be naturally scaled up or down on-demand simply by changing the replica count of the worker deployment.
+
 ----
 
 .. rubric:: References
@@ -106,6 +142,7 @@ Noteburst uses Redis for two concerns:
 
 .. Links
 
+.. _aioredlock: https://github.com/joanvila/aioredlock
 .. _arq: https://arq-docs.helpmanual.io
 .. _FastAPI: https://fastapi.tiangolo.com
 .. _lsst-sqre/noteburst: https://github.com/lsst-sqre/noteburst
