@@ -131,6 +131,29 @@ Once the worker is terminated, the claim naturally expires and the identity beco
 
 Through this mechanism, a pool of Noteburst workers can be naturally scaled up or down on-demand simply by changing the replica count of the worker deployment.
 
+Noteburst's HTTP API
+====================
+
+Noteburst provides a simple web API.
+
+To submit a notebook for execution, clients request ``POST /noteburst/b1/notebooks/`` with a JSON payload that includes the Jupyter Notebook (``ipynb`` file contents) and optionally the name of a Jupyter kernel to execute the notebook with (the default kernel is the default for interactive RSP users).
+Noteburst's response includes a ``Location`` header pointing to a URL where the client can get the result or see the current status of the job.
+
+That result endpoint is ``GET /noteburst/v1/notebooks/{job_id}``.
+The JSON response object from this endpoint includes the status of the execution job (``status`` field).
+When the result is available, the ``ipynb`` field includes the contents of the executed Jupyter Notebook.
+
+Under this model, clients are expected to poll the result URL.
+We initially considered implementing a webhook mechanism as well for Noteburst to push results to clients, however we have not yet implemented that due to the associated security engineering required.
+
+More information about Noteburst's API is available from the RSP environment, for example: https://data-dev.lsst.cloud/noteburst/docs
+
+API security
+============
+
+Gafaelfawr_ authenticates and authorizes access to the Noteburst API (:dmtn:`193`, :cite:`DMTN-193`).
+At the moment, users of Noteburst need tokens with ``exec:admin`` scope (i.e., Noteburst is considered an administrative API).
+
 ----
 
 .. rubric:: References
@@ -145,5 +168,6 @@ Through this mechanism, a pool of Noteburst workers can be naturally scaled up o
 .. _aioredlock: https://github.com/joanvila/aioredlock
 .. _arq: https://arq-docs.helpmanual.io
 .. _FastAPI: https://fastapi.tiangolo.com
+.. _Gafaelfawr: https://gafaelfawr.lsst.io
 .. _lsst-sqre/noteburst: https://github.com/lsst-sqre/noteburst
 .. _lsst-sqre/rsp-jupyter-extensions: https://github.com/lsst-sqre/rsp-jupyter-extensions
