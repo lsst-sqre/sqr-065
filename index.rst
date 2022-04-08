@@ -8,9 +8,19 @@ Abstract
 ========
 
 Jupyter Notebooks are a widely used medium in Rubin Observatory for communicating through documentation and executable code.
-Until now, Jupyter Notebooks have only been accessible from the Notebook Aspect of the Rubin Science Platform (JupyterLab).
+Until now, Jupyter Notebooks have only been accessible from the Notebook Aspect (Nublado/JupyterLab, :sqr:`018` :cite:`SQR-018`) of the Rubin Science Platform (:dmtn:`212` :cite:`DMTN-212`).
 There are applications where we can benefit from "headless" execution of Jupyter notebooks through a web API, such as preparing status dashboards (Times Square, :sqr:`062` :cite:`SQR-062`), and continuous integration of code samples in documentation.
 This technical note discusses the architectural design details of such a service, called Noteburst.
+
+Links
+=====
+
+This technical note provides an overview of Noteburst's design and implementation.
+Lower-level information can be found elsewhere:
+
+- `lsst-sqre/noteburst`_ on GitHub
+- `Deployment configuration in Phalanx <https://github.com/lsst-sqre/phalanx/tree/master/services/noteburst>`__
+- API documentation endpoints, such as https://data-dev.lsst.cloud/noteburst/docs
 
 Use cases
 =========
