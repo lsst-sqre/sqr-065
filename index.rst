@@ -1,16 +1,13 @@
-:tocdepth: 1
+#######################################################################################################
+Design of Noteburst, a programatic JupyterLab notebook execution service for the Rubin Science Platform
+#######################################################################################################
 
-.. Please do not modify tocdepth; will be fixed when a new Sphinx theme is shipped.
+.. abstract::
 
-.. sectnum::
-
-Abstract
-========
-
-Jupyter Notebooks are a widely used medium in Rubin Observatory for communicating through documentation and executable code.
-Until now, Jupyter Notebooks have only been accessible from the Notebook Aspect (Nublado/JupyterLab, :sqr:`018` :cite:`SQR-018`) of the Rubin Science Platform (:dmtn:`212` :cite:`DMTN-212`).
-There are applications where we can benefit from "headless" execution of Jupyter notebooks through a web API, such as preparing status dashboards (Times Square, :sqr:`062` :cite:`SQR-062`), and continuous integration of code samples in documentation.
-This technical note discusses the architectural design details of such a service, called Noteburst.
+   Jupyter Notebooks are a widely used medium in Rubin Observatory for communicating through documentation and executable code.
+   Until now, Jupyter Notebooks have only been accessible from the Notebook Aspect (Nublado/JupyterLab, :sqr:`018` :cite:`SQR-018`) of the Rubin Science Platform (:dmtn:`212` :cite:`DMTN-212`).
+   There are applications where we can benefit from "headless" execution of Jupyter notebooks through a web API, such as preparing status dashboards (Times Square, :sqr:`062` :cite:`SQR-062`), and continuous integration of code samples in documentation.
+   This technical note discusses the architectural design details of such a service, called Noteburst.
 
 Links
 =====
@@ -19,7 +16,7 @@ This technical note provides an overview of Noteburst's design and implementatio
 Lower-level information can be found elsewhere:
 
 - `lsst-sqre/noteburst`_ on GitHub
-- `Deployment configuration in Phalanx <https://github.com/lsst-sqre/phalanx/tree/master/services/noteburst>`__
+- `Deployment configuration in Phalanx <https://github.com/lsst-sqre/phalanx/tree/main/applications/noteburst>`__
 - API documentation endpoints, such as https://data-dev.lsst.cloud/noteburst/docs
 
 Use cases
@@ -92,7 +89,7 @@ Noteburst's workers are responsible for executing notebooks.
 Each worker has a one-to-one relationship with a with a Nublado (JupyterLab) user pod.
 When a worker pod starts up, it starts a JupyterLab pod under a bot user identity.
 A connection to that JupyterLab pod is maintained for the lifetime of the worker pod.
-When the Noteburst worker receives a job request (through arq_, from the Noteburst API deployment), it triggers a notebook execution via the `execution <https://github.com/lsst-sqre/rsp-jupyter-extensions/blob/main/rsp_jupyter_extensions/execution.py>`_ extension endpoint in `lsst-sqre/rsp-jupyter-extensions`_, which in turn runs nbconvert's `~nbconvert.preprocessors.ExecutePreprocessor`.
+When the Noteburst worker receives a job request (through arq_, from the Noteburst API deployment), it triggers a notebook execution via the `execution <https://github.com/lsst-sqre/rsp-jupyter-extensions/blob/main/rsp_jupyter_extensions/handlers/execution.py>`_ extension endpoint in `lsst-sqre/rsp-jupyter-extensions`_, which in turn runs nbconvert's `~nbconvert.preprocessors.ExecutePreprocessor`.
 
 Redis deployment
 ----------------
@@ -164,14 +161,10 @@ API security
 Gafaelfawr_ authenticates and authorizes access to the Noteburst API (:dmtn:`193`, :cite:`DMTN-193`).
 At the moment, users of Noteburst need tokens with ``exec:admin`` scope (i.e., Noteburst is considered an administrative API).
 
-----
+References
+==========
 
-.. rubric:: References
-
-.. Make in-text citations with: :cite:`bibkey`.
-
-.. bibliography:: local.bib lsstbib/books.bib lsstbib/lsst.bib lsstbib/lsst-dm.bib lsstbib/refs.bib lsstbib/refs_ads.bib
-   :style: lsst_aa
+.. bibliography::
 
 .. Links
 
@@ -181,3 +174,4 @@ At the moment, users of Noteburst need tokens with ``exec:admin`` scope (i.e., N
 .. _Gafaelfawr: https://gafaelfawr.lsst.io
 .. _lsst-sqre/noteburst: https://github.com/lsst-sqre/noteburst
 .. _lsst-sqre/rsp-jupyter-extensions: https://github.com/lsst-sqre/rsp-jupyter-extensions
+

@@ -1,2 +1,1 @@
-documenteer[technote]
-sphinx-diagrams
+documenteer[technote]>=1.0.0a18,<2.0

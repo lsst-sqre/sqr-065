@@ -1,20 +1,4 @@
-"""Sphinx configuration for technotes.
+# See the Documenteer docs for how to customize conf.py:
+# https://documenteer.lsst.io/technotes/
 
-https://documenteer.lsst.io/technotes/configuration.html
-"""
-
-from documenteer.conf.technote import *
-
-# Additional extensions
-extensions += [
-    "sphinx_diagrams",
-]
-
-# Additional intersphinx
-intersphinx_mapping["nbconvert"] = (
-    "https://nbconvert.readthedocs.io/en/latest/",
-    None
-)
-
-# The reST default role (used for this markup: `text`)
-default_role = "obj"
+from documenteer.conf.technote import *  # noqa F401 F403
