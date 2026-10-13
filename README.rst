@@ -10,7 +10,7 @@ Design of Noteburst, a programatic JupyterLab notebook execution service for the
 SQR-065
 =======
 
-Jupyter Notebooks are a widely used medium in Rubin Observatory for communicating through documentation and executable code. Until now, Jupyter Notebooks have only been accessible from the Notebook Aspect of the Rubin Science Platform (JupyterLab). There are applications where we can benefit from "headless" execution of Jupyter notebooks through a web API, such as preparing status dashboards (Times Square), and continuous integration of code samples in documentation. This technical note discusses the architectural design details of such a service, called Noteburst.
+Jupyter Notebooks are a widely used medium in Rubin Observatory for communicating through documentation and executable code. Until now, Jupyter Notebooks have only been accessible from the Notebook Aspect of the Rubin Science Platform (JupyterLab). There are applications where we can benefit from headless execution of Jupyter notebooks through a web API, such as preparing status dashboards (Times Square), and continuous integration of code samples in documentation. This technical note discusses the architectural design details of such a service, called Noteburst.
 
 **Links:**
 
